@@ -57,7 +57,7 @@ public class AIObserver
         }
     }
 
-    //计算理想状态价值分布，理想回报参数gamma = 0.9 [0.9 ~ 0.99] 值越小计算效率越高，值越大长期回报越大
+    //计算理想状态价值分布，理想收敛系数gamma = 0.9 [0.9 ~ 0.99] 值越小计算效率越高，值越大长期回报越大
     public void CalculateStateValueDistribution(int _state) {
         AINode node = BlackBord.GetNode(_state);
 
