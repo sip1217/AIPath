@@ -64,4 +64,36 @@ public class BlackBord
         Nodes[_locationIndex].SetTargetSelf();
         TargetLocationIndex = _locationIndex;
     }
+
+    public static AINode TargetNode
+    {
+        get
+        {
+            if (TargetLocationIndex < 0 || TargetLocationIndex >= Nodes.size)
+                return null;
+            return Nodes[TargetLocationIndex];
+        }
+    }
+
+    public static BetterList<AINode> GetActiveNodes()
+    {
+        BetterList<AINode> result = new BetterList<AINode>();
+        foreach(var node in Nodes)
+        {
+            if (node.IsActived)
+                result.Add(node);
+        }
+        return result;
+    }
+
+    public static BetterList<int> GetActiveNodeIndexes()
+    {
+        BetterList<int> result = new BetterList<int>();
+        foreach (var node in Nodes)
+        {
+            if (node.IsActived)
+                result.Add(node.LocationIndex);
+        }
+        return result;
+    }
 }

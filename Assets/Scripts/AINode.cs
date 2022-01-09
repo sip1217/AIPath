@@ -51,8 +51,8 @@ public class AINode
     public AINode(int _locationIndex, bool _isActived = true) {
         locationIndex = _locationIndex;
         isActived = _isActived;
-        reward = -1;
-        stateValue = -1f * BlackBord.Nodes.size;
+        reward = 0;
+        stateValue = -1f;
     }
 
     //---------------------------------------------------
@@ -89,9 +89,9 @@ public class AINode
     #region Public Functions
 
     public AINode ResetNode() {
-        stateValue = -1f * BlackBord.Nodes.size;
+        stateValue = -1f;
         isActived = true;
-        Reward = -1;
+        Reward = 0;
         actions.Clear();
 
         return this;
@@ -161,7 +161,7 @@ public class AINode
 
     public int GetOptimalAction() {
         int oa = -1;
-        if (reward < 0 && actions.size > 0)
+        if (reward == 0 && actions.size > 0)
         {
             float maxV = StateValue;
 
@@ -171,9 +171,12 @@ public class AINode
                 if (BlackBord.SearchRecord.Contains(ai))
                     continue;
 
-                float v = BlackBord.GetNode(ai).StateValue;
+                var node = BlackBord.GetNode(ai);
+                float v = node.StateValue;
                 BlackBord.SearchRecord.Add(ai);
-                if (maxV < v) {
+                if (node.reward == 1)
+                    return ai;
+                else if (maxV < v) {
                     maxV = v;
                     oa = ai;
                 }
@@ -193,11 +196,29 @@ public class AINode
         return ar;
     }
 
+    public bool IsOptimalAction(AINode _node)
+    {
+        if (_node.reward == 1)
+            return true;
+
+        float sv = _node.stateValue;
+        foreach (var loc in actions)
+        {
+            if (loc == _node.locationIndex)
+                continue;
+
+            AINode node = BlackBord.GetNode(loc);
+            if (node.stateValue > sv)
+                return false;
+        }
+        return true;
+    }
+
 
     public void SetTargetSelf() {
         //actions.Clear();
         IsActived = true;
-        Reward = 0;
+        Reward = 1;
         stateValue = 0f;
     }
 

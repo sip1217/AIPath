@@ -5,7 +5,7 @@
  * 
  ****/
 
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -24,7 +24,7 @@ public class AIPathManager : MonoBehaviour
     AIObserver observer;
 
     public RectTransform dataUIPart;
-    private TextMeshProUGUI[] dataList;
+    private Text[] dataList;
 
     private BetterList<int> optimalPath;
 
@@ -50,7 +50,7 @@ public class AIPathManager : MonoBehaviour
 
     void Start()
     {
-        dataList = dataUIPart.GetComponentsInChildren<TextMeshProUGUI>();
+        dataList = dataUIPart.GetComponentsInChildren<Text>();
         agentList = agentsPart.GetComponentsInChildren<AgentCell>();
         nextStepBtnText = nextStepBtn.GetComponentInChildren<Text>();
         RestartSearching();
@@ -143,7 +143,8 @@ public class AIPathManager : MonoBehaviour
         }
     }
 
-    private void SetOptimalPath(bool _isSelected) {
+    private void SetOptimalPath(bool _isSelected)
+    {
         if (_isSelected && !optimalPath.Contains(BlackBord.TargetLocationIndex))
         {
             messageLabel.text = MSG_NOPATH;
@@ -151,6 +152,7 @@ public class AIPathManager : MonoBehaviour
         }
 
         int imax = optimalPath.size - 1;
+        //Debug.Log(" optimalPath.size ===========>>  " + optimalPath.size);
         for (int i = 0; i < imax; i++) {
             agentList[optimalPath[i]].SetAgentAsPathNode(_isSelected);
         }
@@ -197,8 +199,8 @@ public class AIPathManager : MonoBehaviour
 
             case 2:
                 optimalPath = AIObserver.Instance.GetOptimalActionList();
-                SetOptimalPath(true);
                 messageLabel.text = MSG_RESETSTART;
+                SetOptimalPath(true);
                 nextStepBtnText.text = ">> 重设始发节点 <<";
                 nextStepBtn.interactable = false;
                 BlackBord.AIPathStep = 4;

@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class AIObserver
 {
-
+    private BetterList<int> calOnceList = new BetterList<int>();
 
     private static AIObserver instance;
     public static AIObserver Instance {
@@ -57,26 +57,69 @@ public class AIObserver
         }
     }
 
-    //计算理想状态价值分布，理想收敛系数gamma = 0.9 [0.9 ~ 0.99] 值越小计算效率越高，值越大长期回报越大
-    public void CalculateStateValueDistribution(int _state) {
-        AINode node = BlackBord.GetNode(_state);
+    //计算理想状态价值分布，理想收敛系数gamma = 0.9 [0.9 ~ 0.99] 
+    //public void CalculateStateValueDistribution(AINode _node, AINode _lastNode)
+    //{
+    //    float gamma = BlackBord.Gamma;
 
+    //    Debug.LogFormat("node{0}.stateValue =========>> {1}", _node.LocationIndex, _node.StateValue);
+    //    foreach (var act in _node.actions)
+    //    {
+    //        if (_lastNode != null && _lastNode.actions.Contains(act))
+    //            continue;
+
+    //        if (n.IsOptimalAction(node))
+    //            if (!calOnceList.Contains(act))
+    //            {
+    //                AINode n = BlackBord.GetNode(act);
+    //                calOnceList.Add(_node.LocationIndex);
+    //                n.StateValue = _node.Reward + gamma * _node.StateValue;
+    //                CalculateStateValueDistribution(n, _node);
+    //            }
+    //    }
+
+    //    foreach (var act in node.actions)
+    //    {
+    //        if (!calOnceList.Contains(act))
+    //        {
+    //            calOnceList.Add(act);
+    //            CalculateStateValueDistribution(act);
+    //        }
+    //    }
+    //}
+
+    public void CalculateStateValueDistribution(int _targetIndex)
+    {
         float gamma = BlackBord.Gamma;
+        BetterList<int> allLeft = BlackBord.GetActiveNodeIndexes();
 
-        BetterList<int> actions = node.actions;
-        for (int i = 0, imax = actions.size; i < imax; i++) {
-            AINode n = BlackBord.GetNode(actions[i]);
-            if (node.StateValue > n.StateValue)
+        int sum = BlackBord.GetNodesCount();
+        int i = 0;
+        while (allLeft.size > 0)
+        {
+            int index = (_targetIndex + i) % sum;
+            AINode node = BlackBord.GetNode(index);
+
+            if (!node.IsActived || node.StateValue == -1) {
+                i++;
+                continue;
+            } 
+
+            foreach (var act in node.actions)
             {
-                n.StateValue = n.Reward + gamma * node.StateValue;
-                CalculateStateValueDistribution(actions[i]);
+                AINode n = BlackBord.GetNode(act);
+
+                float nsv = node.Reward + gamma * node.StateValue;
+                if (nsv > n.StateValue && n.Reward != 1)
+                    n.StateValue = nsv;
             }
+            allLeft.Remove(index);
+            i++;
         }
     }
 
 
     public void CheckStateValue() {
-        BetterList<AINode> nodes = BlackBord.Nodes;
         CalculateStateValueDistribution(BlackBord.TargetLocationIndex); 
     }
 
