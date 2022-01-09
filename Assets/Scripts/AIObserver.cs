@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class AIObserver
 {
-    private BetterList<int> calOnceList = new BetterList<int>();
+    //private BetterList<int> calOnceList = new BetterList<int>();
 
     private static AIObserver instance;
     public static AIObserver Instance {
@@ -55,6 +55,12 @@ public class AIObserver
         {
             BlackBord.GetNode(i).ResetActions();
         }
+    }
+
+    public void SetIMNodeReward(int _index, float _reward)
+    {
+        BlackBord.GetTargetNode().Reward += _reward;
+        BlackBord.GetNode(_index).Reward += _reward;
     }
 
     //计算理想状态价值分布，理想收敛系数gamma = 0.9 [0.9 ~ 0.99] 
@@ -103,14 +109,16 @@ public class AIObserver
             if (!node.IsActived || node.StateValue == -1) {
                 i++;
                 continue;
-            } 
+            }
 
+            float nextStateValue = node.StateValue == 0 ? 
+                    (node.Reward + gamma * node.StateValue) : node.StateValue;
             foreach (var act in node.actions)
             {
                 AINode n = BlackBord.GetNode(act);
 
-                float nsv = node.Reward + gamma * node.StateValue;
-                if (nsv > n.StateValue && n.Reward != 1)
+                float nsv = n.Reward + gamma * nextStateValue;
+                if (nsv > n.StateValue && n.Reward < 1)
                     n.StateValue = nsv;
             }
             allLeft.Remove(index);
@@ -136,12 +144,12 @@ public class AIObserver
         return passableList;
     }
 
-    public BetterList<int> GetOptimalActionList() {
+    public BetterList<int> GetOptimalActionList(int _locationIndex) {
         BetterList<int> oal = new BetterList<int>();
         BlackBord.SearchRecord.Clear();
-        BlackBord.SearchRecord.Add(BlackBord.StartLocationIndex);
+        BlackBord.SearchRecord.Add(_locationIndex);
 
-        int ptr = BlackBord.GetNode(BlackBord.StartLocationIndex).GetOptimalAction();
+        int ptr = BlackBord.GetNode(_locationIndex).GetOptimalAction();
         while (ptr != -1) {
             oal.Add(ptr);
             ptr = BlackBord.GetNode(ptr).GetOptimalAction();
@@ -149,6 +157,11 @@ public class AIObserver
 
         BlackBord.SearchRecord.Clear();
         return oal;
+    }
+
+    public int GetOptimalActionListCount(int _locationIndex)
+    {
+        return GetOptimalActionList(_locationIndex).size;
     }
 
     public float GetMaxValue(BetterList<float> _values, ref int _maxIndex) {

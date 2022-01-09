@@ -14,6 +14,7 @@ public class AIPathManager : MonoBehaviour
 {
     private static readonly string MSG_RESTART = "请在网格中任意点击节点，将其设置为障碍节点！\n完成后点击‘确认完成’进入下一步！";
     private static readonly string MSG_SETTARGET = "请任意选择一个节点作为目的地！\n确认后点击‘确认目标节点’进入下一步";
+    private static readonly string MSG_SETIMNODE = "请设置权重节点！\n确认后点击‘确认完毕’进入下一步";
     private static readonly string MSG_SETSTART = "请选择目标节点以外的任意节点作为始发点，\n\n确认后点击‘获取最佳路线’可浏览结果！";
     private static readonly string MSG_RESETSTART = "已获取当前最优路线！可点击‘重新设置始发点’继续体验，或点击‘重新开始’重新布局场景！";
     private static readonly string MSG_BADSTART = "无法将目的地改为始发点，请重新选择始发点！";
@@ -33,6 +34,7 @@ public class AIPathManager : MonoBehaviour
 
     private int lastTarget = -1;
     private int lastStart = -1;
+    private int currentIMIndex = -1;
 
     private bool showingDebugData = false;
 
@@ -42,6 +44,8 @@ public class AIPathManager : MonoBehaviour
     public Button trainingDebugBtn;
 
     public Text messageLabel;
+
+    private string IMNodeReward = "0.5";
 
     private void Awake()
     {
@@ -88,8 +92,29 @@ public class AIPathManager : MonoBehaviour
                 break;
 
             case 2:
+                SetIntermediateNode(_index);
+                break;
+
+            case 3:
                 ResetStart(_index);
                 break;
+        }
+    }
+
+    public void SetIntermediateNode(int _index)
+    {
+        AINode node = BlackBord.GetNode(_index);
+        bool isIMNode = node.IsIMNode;
+        if(isIMNode)
+        {
+            agentList[_index].SetAgentAsIMNode(false);
+            dataList[_index].text = string.Empty;
+        }
+        else
+        {
+            agentList[_index].SetAgentAsIMNode(true);
+            dataList[_index].text = IMNodeReward;
+            AIObserver.Instance.SetIMNodeReward(_index, float.Parse(IMNodeReward));
         }
     }
 
@@ -190,15 +215,24 @@ public class AIPathManager : MonoBehaviour
             case 1:
                 AIObserver.Instance.ResetNodesActions();
                 AIObserver.Instance.CheckStateValue();
-                trainingDebugBtn.interactable = true;
-                messageLabel.text = MSG_SETSTART;
-                nextStepBtn.interactable = false;
+                messageLabel.text = MSG_SETIMNODE;
+                nextStepBtn.interactable = true;
                 nextStepBtnText.text = ">> 获取最佳路线 <<";
                 BlackBord.AIPathStep = 2;
                 break;
 
             case 2:
-                optimalPath = AIObserver.Instance.GetOptimalActionList();
+                AIObserver.Instance.ResetNodesActions();
+                AIObserver.Instance.CheckStateValue();
+                trainingDebugBtn.interactable = true;
+                messageLabel.text = MSG_SETSTART;
+                nextStepBtn.interactable = false;
+                nextStepBtnText.text = ">> 获取最佳路线 <<";
+                BlackBord.AIPathStep = 3;
+                break;
+
+            case 3:
+                optimalPath = AIObserver.Instance.GetOptimalActionList(BlackBord.TargetLocationIndex);
                 messageLabel.text = MSG_RESETSTART;
                 SetOptimalPath(true);
                 nextStepBtnText.text = ">> 重设始发节点 <<";
@@ -206,7 +240,7 @@ public class AIPathManager : MonoBehaviour
                 BlackBord.AIPathStep = 4;
                 break;
 
-            case 3:
+            case 4:
                 RemoveStart();
                 messageLabel.text = MSG_GETPATH;
                 nextStepBtnText.text = ">> 获取路线 <<";

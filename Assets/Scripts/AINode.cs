@@ -18,13 +18,18 @@ public class AINode
     private float reward = -1f;
     public float Reward {
         get { return reward; }
-        private set { reward = value; }
+        set { reward = value; }
     }
 
     private float stateValue;
     public float StateValue {
         get { return stateValue; }
         set { stateValue = value; }
+    }
+
+    public bool IsIMNode
+    {
+        get { return reward > 0 && reward < 1; }
     }
 
     public BetterList<int> actions = new BetterList<int>();

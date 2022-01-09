@@ -18,6 +18,7 @@ public class BlackBord
     public static int TargetLocationIndex = -1;
 
     public static int BlockCount = 0;
+    public static int IMNodeCount = 0;
     public static readonly float Gamma = 0.9f;
 
 
@@ -29,6 +30,7 @@ public class BlackBord
     public static Color COLOR_PATHNODE = new Color(0f, 1f, 0f, 0.45f);
     public static Color COLOR_BADNODE = new Color(1f, 0f, 0f, 0.45f);
     public static Color COLOR_NORMAL = new Color(0f, 0.569f, 1f, 0.176f);
+    public static Color COLOR_IMNODE = new Color(0.2f, 0.2f, 0.2f, 0.45f);
 
 
     public static AINode GetNode(int _index) {
@@ -36,6 +38,14 @@ public class BlackBord
             return null;
 
         return Nodes[_index];
+    }
+
+    public static AINode GetTargetNode()
+    {
+        if (TargetLocationIndex < 0 || TargetLocationIndex >= Nodes.size)
+            return null;
+
+        return Nodes[TargetLocationIndex];
     }
 
     public static AINode GetNodeForSearching(int _index)

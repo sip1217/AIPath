@@ -64,6 +64,22 @@ public class AgentCell : MonoBehaviour
         }
     }
 
+    public void SetAgentAsIMNode(bool _isIMNode)
+    {
+        if (_isIMNode)
+        {
+            isTweening = true;
+            selfTrans.DOLocalRotate(Vector3.up * 180f, 0.5f).OnComplete(() =>
+            { selfMater.color = BlackBord.COLOR_IMNODE; isTweening = false; });
+        }
+        else
+        {
+            isTweening = true;
+            selfTrans.DOLocalRotate(Vector3.zero, 0.5f).OnComplete(() =>
+            { selfMater.color = BlackBord.COLOR_NORMAL; isTweening = false; });
+        }
+    }    
+
     public void SetAgentAsPathNode(bool _isOptNode)
     {
         if (_isOptNode)
